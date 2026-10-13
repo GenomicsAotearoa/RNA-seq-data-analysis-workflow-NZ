@@ -283,10 +283,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><img src="theme_images/exploratory-analysis.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%"></p>
 </figure>
 </div>
-<p>Exploratory analysis is will cover basic visualisations and characterisations of the data as well as any initial transformations (<em>e.g.,</em> library size) required before we move on to identifying differentially expressed genes.</p>
+<p>Exploratory analysis will cover basic visualisations and characterisations of the data before we move on to identifying differentially expressed genes.</p>
 <section id="what-is-exploratory-analysis-and-why-is-it-necessary" class="level2">
 <h2 class="anchored" data-anchor-id="what-is-exploratory-analysis-and-why-is-it-necessary">What is exploratory analysis and why is it necessary?</h2>
-<p>Exploratory analysis is looking at the data. You are attempting to get a sense of what the data looks like, to notice outliers or issues (<em>e.g.,</em> hey isn’t it weird that one of my wt samples groups with all the mutant samples, and one of the mut samples groups with the wt samples? I wonder what’s happening there?).</p>
+<p>Exploratory analysis is looking at the data. You are attempting to get a sense of what the data looks like, to notice outliers or issues.</p>
 <p>If your data set was a physical problem (like a squeaky wheel or a well wrapped present) you’d physically explore it (pick it up, is it heavy, do I shake it?). Exploratory analysis is the data science equivalent.</p>
 </section>
 <section id="exploratory-analysis-1" class="level2">
@@ -385,7 +385,7 @@ LOC117818779        0</code></pre>
 <section id="remove-non-expressed-genes-optional" class="level2">
 <h2 class="anchored" data-anchor-id="remove-non-expressed-genes-optional">Remove non-expressed genes (optional)</h2>
 <p>If you are working in a complex organism, many genes will not be expressed in all tissue types. It can be worth checking to see how many genes have zero counts and opting to remove these from your data object.</p>
-<p>How many genes have counts of zero? What’s the distrubution of our counts?</p>
+<p>How many genes have counts of zero? What’s the distribution of our counts?</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colSums</span>(counts <span class="sc">==</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -426,29 +426,33 @@ SI18_18G SI18_22G  SI16_1G  SI16_2G  SI16_3G SI18_47G SI18_49G
  Max.   :49808.0   Max.   :36463.0   Max.   :28195.0  </code></pre>
 </div>
 </div>
-<p>Zero counts automatically removed during DEseq, but for visualisation need to deal with them. either remove very low counts or add 1 (when logging).</p>
-<p>We’ll cover ways to filter out lower counts</p>
+<p>Zero counts are automatically removed during DEseq, but for visualisation purrposes we need to deal with them. You can either remove very low counts and/or add 1 to all counts (to prevent issues when logging counts of 0).</p>
+<p>To remove all rows with 0 counts (genes where no sample has a read mapping to it), you could run something like this:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Demo code - don't need to run this</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>counts_filtered <span class="ot">&lt;-</span> counts[<span class="fu">rowSums</span>(counts) <span class="sc">&gt;</span> <span class="dv">0</span>, ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 <section id="visualising-our-data-set" class="level2">
 <h2 class="anchored" data-anchor-id="visualising-our-data-set">Visualising our data set</h2>
 <section id="count-distribution" class="level3">
 <h3 class="anchored" data-anchor-id="count-distribution">Count distribution</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert counts data to long format for ggplot</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>counts_long <span class="ot">&lt;-</span> counts <span class="sc">%&gt;%</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(<span class="st">"Gene"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>Gene, <span class="at">names_to =</span> <span class="st">"sample"</span>, <span class="at">values_to =</span> <span class="st">"Counts"</span>)</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Create boxplot with ggplot2</span></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(counts_long, <span class="fu">aes</span>(<span class="at">x =</span> sample, <span class="at">y =</span> Counts)) <span class="sc">+</span></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Samples"</span>, <span class="at">y =</span> <span class="st">"Counts"</span>) <span class="sc">+</span></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert counts data to long format for ggplot</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>counts_long <span class="ot">&lt;-</span> counts <span class="sc">%&gt;%</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(<span class="st">"Gene"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>Gene, <span class="at">names_to =</span> <span class="st">"sample"</span>, <span class="at">values_to =</span> <span class="st">"Counts"</span>)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Create boxplot with ggplot2</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(counts_long, <span class="fu">aes</span>(<span class="at">x =</span> sample, <span class="at">y =</span> Counts)) <span class="sc">+</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Samples"</span>, <span class="at">y =</span> <span class="st">"Counts"</span>) <span class="sc">+</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="exploratory_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="exploratory_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -457,24 +461,24 @@ SI18_18G SI18_22G  SI16_1G  SI16_2G  SI16_3G SI18_47G SI18_49G
 <p>Log2 transform the data, adding 1 to avoid log(0) errors.</p>
 <p>We use log2 for counts for RNAseq - more on why later!</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># create new df that includes counts in long form and all metadata in the coldata</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>counts_long_metadata <span class="ot">&lt;-</span> counts_long <span class="sc">|&gt;</span> </span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(coldata, <span class="at">by =</span> <span class="st">"sample"</span>)  <span class="sc">|&gt;</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sample =</span> <span class="fu">fct_reorder</span>(sample, histology))</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Create log2 counts boxplot with ggplot2</span></span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(counts_long_metadata, <span class="fu">aes</span>(</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> sample,</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> <span class="fu">log2</span>(Counts <span class="sc">+</span> <span class="dv">1</span>),</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">fill =</span> histology)) <span class="sc">+</span></span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Samples"</span>, <span class="at">y =</span> <span class="st">"Log Counts +1"</span>) <span class="sc">+</span></span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># create new df that includes counts in long form and all metadata in the coldata</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>counts_long_metadata <span class="ot">&lt;-</span> counts_long <span class="sc">|&gt;</span> </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(coldata, <span class="at">by =</span> <span class="st">"sample"</span>)  <span class="sc">|&gt;</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sample =</span> <span class="fu">fct_reorder</span>(sample, histology))</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Create log2 counts boxplot with ggplot2</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(counts_long_metadata, <span class="fu">aes</span>(</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> sample,</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> <span class="fu">log2</span>(Counts <span class="sc">+</span> <span class="dv">1</span>),</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">fill =</span> histology)) <span class="sc">+</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Samples"</span>, <span class="at">y =</span> <span class="st">"Log Counts +1"</span>) <span class="sc">+</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="exploratory_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="exploratory_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -488,27 +492,24 @@ SI18_18G SI18_22G  SI16_1G  SI16_2G  SI16_3G SI18_47G SI18_49G
 <p>Library size refers to the total number of reads for the entire sample. If two samples have vastly different library sizes, genes would look differentially expressed between samples e.g., if one library was twice as large as another, all genes would look to be upregulated in the larger library sample. Before we compare counts across samples we need to check whether the library sizes are approximately similar, and if they are not, make a correction to account for the size differences.</p>
 <p>In this code below, focus on what we are trying to <em>do</em> with the code rather than the code itself. For each sample in our counts object, we are adding up the total counts across every gene to calculate the library size. There are different ways you could achieve this in R, but if you understand the end goal you can find your own path.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(forcats)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co">#fct_reorder() comes from forcats</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="fu">colSums</span>(counts) <span class="sc">%&gt;%</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">setNames</span>(<span class="st">"reads"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(<span class="st">"sample"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(coldata, <span class="at">by =</span> <span class="st">"sample"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sample =</span> <span class="fu">fct_reorder</span>(sample, histology)) <span class="sc">%&gt;%</span> </span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> sample, <span class="at">y =</span> reads, <span class="at">fill =</span> histology)) <span class="sc">+</span></span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">colour =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>   <span class="at">y =</span> <span class="st">"Reads mapped per sample"</span>,</span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>   <span class="at">x =</span> <span class="st">"Sample"</span>,</span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>   <span class="at">title =</span> <span class="st">"Library size"</span>) <span class="sc">+</span></span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
-<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colSums</span>(counts) <span class="sc">%&gt;%</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">setNames</span>(<span class="st">"reads"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(<span class="st">"sample"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(coldata, <span class="at">by =</span> <span class="st">"sample"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sample =</span> <span class="fu">fct_reorder</span>(sample, histology)) <span class="sc">%&gt;%</span> </span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> sample, <span class="at">y =</span> reads, <span class="at">fill =</span> histology)) <span class="sc">+</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">colour =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>   <span class="at">y =</span> <span class="st">"Reads mapped per sample"</span>,</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>   <span class="at">x =</span> <span class="st">"Sample"</span>,</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>   <span class="at">title =</span> <span class="st">"Library size"</span>) <span class="sc">+</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="exploratory_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="exploratory_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -519,9 +520,9 @@ SI18_18G SI18_22G  SI16_1G  SI16_2G  SI16_3G SI18_47G SI18_49G
 <h3 class="anchored" data-anchor-id="principal-component-analysis">Principal Component Analysis</h3>
 <p>A principal component analysis (PCA) is linear dimensionality technique that can be used as a way to visualise sample-to-sample distances. In this ordination method, the data points (<em>i.e.,</em> here, the samples) are projected onto the 2D plane such that they spread out in the two directions which explain most of the differences in the data. The x-axis is the direction (or principal component) which separates the data points the most (PC1). The amount of the total variance which is contained in the direction is printed in the axis label. The y-axis shows the next most variance (principal component 2). More principal components (PC3, PC4 and so forth) can also be extracted and plotted to investigate trends in the data.</p>
 <p>In simple turns, we are making a plot that shows us how similar or different each sample is, taking in to account all of the gene expression. A PCA plot can help us see the biggest sources of biological variation and help determine which has more of an affect on the gene expression – whether that be the treatment type, the tissue type or something else (<em>e.g.,</em> an unintended batch effect or outliers).</p>
-<p>First, we need to remove all genes with zero counts across all samples.</p>
+<p>First, we need to remove all genes with zero counts across all samples. We can apply a slightly stricter filtering threshold than the one we used earlier (<code>counts_filtered &lt;- counts[rowSums(counts) &gt; 0, ]</code>) where all genes with zero counts across all samples are removed. Below, this code will keep all genes where at least two columns (samples) have a count of 10 or more. This is arbitrary, you could chose to make it stricter or more lenient depending on your dataset and what you are trying to achieve.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>counts_filtered <span class="ot">&lt;-</span> counts[<span class="fu">rowSums</span>(counts) <span class="sc">&gt;</span> <span class="dv">0</span>, ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>counts_filtered <span class="ot">&lt;-</span> counts[<span class="fu">rowSums</span>(counts <span class="sc">&gt;=</span> <span class="dv">10</span>) <span class="sc">&gt;=</span> <span class="dv">2</span>, ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Next the counts object needs to be flipped for <code>prcomp()</code> analysis.</p>
 <p>Our counts dataframe currently looks like this:</p>
@@ -538,19 +539,19 @@ Sample 3   0         0         2
 </code></pre>
 <p>Use the function <code>t()</code> to transpose the table. Raw RNAseq counts should not be used for PCA due to issues with library size difference (which we saw above) and heteroscedasticity (variance is dependant on the mean). There are multiple transformations we could do (log2, rlog, vst – variance stabilizing transformation) to normalise the counts. We’ll log2 the data here (later we’ll use the <code>vst()</code> function from the <code>DEseq</code> package) and we can do this at the same time as transposing. We still need to add 1 – some zeros will remain in the dataset as only genes with zeros for <em>all</em> samples are removed.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>pca <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(<span class="fu">t</span>(<span class="fu">log2</span>(counts_filtered <span class="sc">+</span><span class="dv">1</span>)))</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(pca)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>pca <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(<span class="fu">t</span>(<span class="fu">log2</span>(counts_filtered <span class="sc">+</span><span class="dv">1</span>)))</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(pca)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>List of 5
- $ sdev    : num [1:15] 205.7 81.1 67.3 46.8 37.3 ...
- $ rotation: num [1:25904, 1:15] 0.01807 0.00316 0.00221 0.00532 0.00178 ...
+ $ sdev    : num [1:15] 200.1 79.7 62.7 42.4 34.4 ...
+ $ rotation: num [1:19878, 1:15] 0.01863 0.00325 0.00229 0.00541 0.01484 ...
   ..- attr(*, "dimnames")=List of 2
-  .. ..$ : chr [1:25904] "LOC117813751" "ccdc51" "tma7" "LOC117815572" ...
+  .. ..$ : chr [1:19878] "LOC117813751" "ccdc51" "tma7" "LOC117815572" ...
   .. ..$ : chr [1:15] "PC1" "PC2" "PC3" "PC4" ...
- $ center  : Named num [1:25904] 2.778 6.494 10.875 2.17 0.856 ...
-  ..- attr(*, "names")= chr [1:25904] "LOC117813751" "ccdc51" "tma7" "LOC117815572" ...
+ $ center  : Named num [1:19878] 2.78 6.49 10.87 2.17 5.48 ...
+  ..- attr(*, "names")= chr [1:19878] "LOC117813751" "ccdc51" "tma7" "LOC117815572" ...
  $ scale   : logi FALSE
- $ x       : num [1:15, 1:15] -120.8 -93.8 -180 -158.4 -163.6 ...
+ $ x       : num [1:15, 1:15] -115.4 -88.9 -175.7 -154.6 -159.4 ...
   ..- attr(*, "dimnames")=List of 2
   .. ..$ : chr [1:15] "SI16_21G" "SI16_23G" "SI18_30G" "SI18_48G" ...
   .. ..$ : chr [1:15] "PC1" "PC2" "PC3" "PC4" ...
@@ -560,62 +561,62 @@ Sample 3   0         0         2
 <p>The PCA object is a list with several attributes we will pull out for plotting.</p>
 <p>What we don’t currently have loaded in is our metadata, which we’ll want for plotting. Let’s pull out the PC data, convert rownames to a column so that the sample names can be matched to the coldata dataframe using left join.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>pca_data <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(pca<span class="sc">$</span>x) <span class="sc">%&gt;%</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(<span class="st">"sample"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(coldata, <span class="at">by =</span> <span class="st">"sample"</span>)</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(pca_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>pca_data <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(pca<span class="sc">$</span>x) <span class="sc">%&gt;%</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(<span class="st">"sample"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(coldata, <span class="at">by =</span> <span class="st">"sample"</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(pca_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    sample        PC1        PC2        PC3       PC4       PC5        PC6
-1 SI16_21G -120.82285 -135.91095   1.478569 -19.34740  52.18082  13.245839
-2 SI16_23G  -93.76787 -130.85071  43.343913 -69.03975  50.48381   4.426274
-3 SI18_30G -180.01176  -44.68988 -35.234065  52.70193 -26.58629 -13.703343
-4 SI18_48G -158.35692  -39.97784 -14.860459  35.72544 -24.06240 -30.795410
-5 SI18_52G -163.57499  -74.08556 -30.028740  56.26022 -26.35214 -11.999518
-6 SI16_22G   58.89152  -16.36277  76.365085 -98.15896 -92.43013 -20.664386
-         PC7         PC8        PC9       PC10       PC11      PC12       PC13
-1  -2.500859  -1.1793828   9.512881  19.916887 -18.502002  28.82050 -48.397394
-2 -11.349428   1.6862594  -6.867956 -15.661814  19.941726 -26.95563  42.339462
-3   1.005688  18.9418467 -31.675541 -47.144978 -17.287961 -21.94893   6.148362
-4  38.198561 -46.7077505  45.058692  30.421381  11.183248 -14.80380  20.397189
-5  12.074167  21.1672796  -3.410292 -14.526100   9.987739  26.93648 -15.803532
-6  -6.532374   0.3055812  -4.334207   1.918043 -12.082305  12.11052  -8.970549
-        PC14          PC15 batchname condition histology timepoint
-1  27.618533 -4.707486e-13      SI16         C         F        50
-2 -18.802687 -6.348732e-13      SI16         C         F        50
-3  44.676335 -9.047245e-13      SI18         T         F        61
-4  12.553596 -9.369998e-13      SI18         C         F       117
-5 -61.940587 -1.018630e-12      SI18         C         F       117
-6   3.086114  8.854356e-13      SI16         T        MT        50
-  adj.timepoint length.mm weight.g
-1             0       172     72.6
-2             0       173     68.9
-3            61       170     67.0
-4           117       170     71.4
-5           117       161     56.3
-6            20       178     80.0</code></pre>
+1 SI16_21G -115.40201 -133.60413   2.733765  24.14914  49.71906 -13.165591
+2 SI16_23G  -88.86506 -127.88765  49.296473  67.37976  37.72320  -4.914023
+3 SI18_30G -175.67976  -44.87182 -41.570272 -47.88684 -21.39136  12.865041
+4 SI18_48G -154.56811  -39.71784 -19.771000 -33.43030 -19.17439  39.083682
+5 SI18_52G -159.38555  -73.66377 -36.980099 -52.33758 -19.49532  14.777381
+6 SI16_22G   59.85799  -15.38120  81.324431  72.71312 -91.71984  12.409531
+          PC7        PC8        PC9       PC10      PC11       PC12       PC13
+1   0.9259945  18.686625   4.434831  -2.206133 -40.32875  41.052867  -1.382718
+2  -2.3950814 -18.807824  -0.351286  -1.981447  37.30643 -35.657086  -3.692596
+3 -25.2849768 -42.844168 -24.546734  16.239548  20.94450  30.634983 -23.511774
+4  57.5562841  35.857002  16.696809   3.486320  19.49014  -2.120426 -16.625133
+5 -18.2533754   6.133761 -19.033976 -14.682713 -22.02857 -31.787392  44.914579
+6  -2.4049836  -4.288527   3.801546   8.398512 -17.16222   9.393724   5.035271
+        PC14         PC15 batchname condition histology timepoint adj.timepoint
+1 -5.5988087 2.183614e-13      SI16         C         F        50             0
+2  2.1084595 2.029630e-13      SI16         C         F        50             0
+3 -4.8237442 2.397880e-13      SI18         T         F        61            61
+4 -2.4412137 1.880517e-13      SI18         C         F       117           117
+5  9.9707917 1.746582e-13      SI18         C         F       117           117
+6 -0.0457486 2.300565e-13      SI16         T        MT        50            20
+  length.mm weight.g
+1       172     72.6
+2       173     68.9
+3       170     67.0
+4       170     71.4
+5       161     56.3
+6       178     80.0</code></pre>
 </div>
 </div>
 <p>Now we have a data frame with a column each for sample name, each of the PCs, and each of our metadata variables.</p>
 <p>We can also pull out the sdev values from our pca object into a vector to use this for plotting in a moment too:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>pct_var <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> pca<span class="sc">$</span>sdev<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> <span class="fu">sum</span>(pca<span class="sc">$</span>sdev<span class="sc">^</span><span class="dv">2</span>),<span class="dv">1</span>)</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>pct_var</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>pct_var <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> pca<span class="sc">$</span>sdev<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> <span class="fu">sum</span>(pca<span class="sc">$</span>sdev<span class="sc">^</span><span class="dv">2</span>),<span class="dv">1</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>pct_var</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code> [1] 66.7 10.4  7.1  3.5  2.2  1.5  1.3  1.2  1.1  1.1  1.0  1.0  1.0  0.9  0.0</code></pre>
+<pre><code> [1] 68.7 10.9  6.7  3.1  2.0  1.3  1.1  1.0  1.0  0.9  0.9  0.8  0.8  0.7  0.0</code></pre>
 </div>
 </div>
 <p>Now we are ready to plot our data, which we can do using a ggplot scatterplot. There are functions that automatically build PCA plots (<em>e.g.,</em> <code>ggfortify::autoplot(pca)</code> or <code>DESeq2::plotPCA(vsd, intgroup="condition")</code> ), rather than building them from scratch with ggplot2, but they have slightly less flexibilty than using ggplot2.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(pca_data, <span class="fu">aes</span>(<span class="at">x =</span> PC1, <span class="at">y =</span> PC2, <span class="at">colour =</span> histology)) <span class="sc">+</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span></span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="fu">paste0</span>(<span class="st">"PC1: "</span>, pct_var[<span class="dv">1</span>], <span class="st">"% variance"</span>),</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="fu">paste0</span>(<span class="st">"PC2: "</span>, pct_var[<span class="dv">2</span>], <span class="st">"% variance"</span>)) <span class="sc">+</span></span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(pca_data, <span class="fu">aes</span>(<span class="at">x =</span> PC1, <span class="at">y =</span> PC2, <span class="at">colour =</span> histology)) <span class="sc">+</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="fu">paste0</span>(<span class="st">"PC1: "</span>, pct_var[<span class="dv">1</span>], <span class="st">"% variance"</span>),</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="fu">paste0</span>(<span class="st">"PC2: "</span>, pct_var[<span class="dv">2</span>], <span class="st">"% variance"</span>)) <span class="sc">+</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="exploratory_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="exploratory_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -635,18 +636,18 @@ SOLUTION
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>The next thing we should test is <strong>batch effect</strong>. We have two different experimental batches that our data was generated from – one in 2016 (SI16) and one in 2018 (SI18). We can change the shape of the points to show batch and we can add labels for the points too:</p>
+<p>The next thing we should investigate is <strong>batch effect</strong>. We have two different experimental batches that our data was generated from – one in 2016 (SI16) and one in 2018 (SI18). We can change the shape of the points to show batch and we can add labels for the points too:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(pca_data, <span class="fu">aes</span>(<span class="at">x =</span> PC1, <span class="at">y =</span> PC2, <span class="at">colour =</span> histology, <span class="at">shape =</span> batchname)) <span class="sc">+</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span></span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> sample), <span class="at">nudge_y =</span> <span class="dv">15</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="fu">paste0</span>(<span class="st">"PC1: "</span>, pct_var[<span class="dv">1</span>], <span class="st">"% variance"</span>),</span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="fu">paste0</span>(<span class="st">"PC2: "</span>, pct_var[<span class="dv">2</span>], <span class="st">"% variance"</span>)) <span class="sc">+</span></span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(pca_data, <span class="fu">aes</span>(<span class="at">x =</span> PC1, <span class="at">y =</span> PC2, <span class="at">colour =</span> histology, <span class="at">shape =</span> batchname)) <span class="sc">+</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> sample), <span class="at">nudge_y =</span> <span class="dv">15</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="fu">paste0</span>(<span class="st">"PC1: "</span>, pct_var[<span class="dv">1</span>], <span class="st">"% variance"</span>),</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="fu">paste0</span>(<span class="st">"PC2: "</span>, pct_var[<span class="dv">2</span>], <span class="st">"% variance"</span>)) <span class="sc">+</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="exploratory_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="exploratory_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>

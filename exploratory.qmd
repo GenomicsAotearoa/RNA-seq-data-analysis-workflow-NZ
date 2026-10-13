@@ -8,11 +8,11 @@ code-overflow: wrap
 ![](theme_images/exploratory-analysis.png){width=80% fig-align="center"}
 
 
-Exploratory analysis is will cover basic visualisations and characterisations of the data as well as any initial transformations (*e.g.,* library size) required before we move on to identifying differentially expressed genes. 
+Exploratory analysis will cover basic visualisations and characterisations of the data before we move on to identifying differentially expressed genes. 
 
 ## What is exploratory analysis and why is it necessary?
 
-Exploratory analysis is looking at the data. You are attempting to get a sense of what the data looks like, to notice outliers or issues (*e.g.,* hey isn't it weird that one of my wt samples groups with all the mutant samples, and one of the mut samples groups with the wt samples? I wonder what's happening there?).
+Exploratory analysis is looking at the data. You are attempting to get a sense of what the data looks like, to notice outliers or issues.
 
 If your data set was a physical problem (like a squeaky wheel or a well wrapped present) you'd physically explore it (pick it up, is it heavy, do I shake it?). Exploratory analysis is the data science equivalent.
 
@@ -88,7 +88,7 @@ The first column has all our sample names, which match exactly the column names 
 
 If you are working in a complex organism, many genes will not be expressed in all tissue types. It can be worth checking to see how many genes have zero counts and opting to remove these from your data object.
 
-How many genes have counts of zero? What's the distrubution of our counts?
+How many genes have counts of zero? What's the distribution of our counts?
 
 ```{r}
 
@@ -98,9 +98,18 @@ summary(counts)
 ```
 
 
-Zero counts automatically removed during DEseq, but for visualisation need to deal with them. either remove very low counts or add 1 (when logging). 
+Zero counts are automatically removed during DEseq, but for visualisation purrposes we need to deal with them. You can either remove very low counts and/or add 1 to all counts (to prevent issues when logging counts of 0). 
 
-We'll cover ways to filter out lower counts 
+To remove all rows with 0 counts (genes where no sample has a read mapping to it), you could run something like this:
+
+```{r}
+#| eval: FALSE
+
+```{r}
+# Demo code - don't need to run this
+counts_filtered <- counts[rowSums(counts) > 0, ]
+```
+
 
 
 ## Visualising our data set
@@ -172,9 +181,6 @@ In this code below, focus on what we are trying to *do* with the code rather tha
 
 ```{r}
 
-library(forcats)
-#fct_reorder() comes from forcats
-
 colSums(counts) %>%
   as.data.frame() %>%
   setNames("reads") %>% 
@@ -201,9 +207,10 @@ A principal component analysis (PCA) is linear dimensionality technique that can
 
 In simple turns, we are making a plot that shows us how similar or different each sample is, taking in to account all of the gene expression. A PCA plot can help us see the biggest sources of biological variation and help determine which has more of an affect on the gene expression – whether that be the treatment type, the tissue type or something else (*e.g.,* an unintended batch effect or outliers).  
 
-First, we need to remove all genes with zero counts across all samples. 
+First, we need to remove all genes with zero counts across all samples. We can apply a slightly stricter filtering threshold than the one we used earlier (`counts_filtered <- counts[rowSums(counts) > 0, ]`) where all genes with zero counts across all samples are removed. Below, this code will keep all genes where at least two columns (samples) have a count of 10 or more. This is arbitrary, you could chose to make it stricter or more lenient depending on your dataset and what you are trying to achieve. 
+ 
 ```{r}
-counts_filtered <- counts[rowSums(counts) > 0, ]
+counts_filtered <- counts[rowSums(counts >= 10) >= 2, ]
 ```
 
 Next the counts object needs to be flipped for `prcomp()` analysis.
@@ -273,7 +280,7 @@ What's the next thing we might want to plot using PCA data to investigate trends
 
 ::: {.callout-tip collapse="true"}
 # SOLUTION
-The next thing we should test is **batch effect**. We have two different experimental batches that our data was generated from – one in 2016 (SI16) and one in 2018 (SI18). We can change the shape of the points to show batch and we can add labels for the points too:
+The next thing we should investigate is **batch effect**. We have two different experimental batches that our data was generated from – one in 2016 (SI16) and one in 2018 (SI18). We can change the shape of the points to show batch and we can add labels for the points too:
 
 ```{r}
 
