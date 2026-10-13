@@ -86,15 +86,20 @@ Limma will create one of the special objects mentioned earlier in this workshop 
 
 Load the libraries required for running limma, create a dge object where we specify counts (here you specify the matrix that contains your counts, in our case our object is already called counts). Then calculate normalisation factors, which will be used to adjust for library size differences. 
 
-```{r}
-#| echo: false
-#| message: false
 
-library(tidyverse)
-coldata <- read.table("/Users/vanch93p/Library/CloudStorage/OneDrive-UniversityofOtago/GenomicsAotearoa/Workshops_GA/testing-new-content/RNAseq-new-content/rnaseq-spotty/data-files/coldata.txt", sep="\t", header=TRUE)
-counts  <- read.table("/Users/vanch93p/Library/CloudStorage/OneDrive-UniversityofOtago/GenomicsAotearoa/Workshops_GA/testing-new-content/RNAseq-new-content/rnaseq-spotty/data-files/counts.txt",  sep="\t", header=TRUE, row.names=1)
+::: {.callout-note collapse="true"}
+# Need to load in the data again?
+
+
+<!-- Hello future instructors! The code below needs to run for this page to render, don't eval false it! -->
+
+```{r}
+
+coldata <- read.table("https://raw.githubusercontent.com/GenomicsAotearoa/RNA-seq-data-analysis-workflow-NZ/refs/heads/main/data-files/coldata.txt", sep="\t", header=TRUE)
+counts  <- read.table("https://raw.githubusercontent.com/GenomicsAotearoa/RNA-seq-data-analysis-workflow-NZ/refs/heads/main/data-files/counts.txt",  sep="\t", header=TRUE, row.names=1)
 
 ```
+:::
 
 ```{r}
 #| message: false
@@ -103,9 +108,9 @@ counts  <- read.table("/Users/vanch93p/Library/CloudStorage/OneDrive-Universityo
 # BiocManager::install("edgeR")
 # BiocManager::install("DESeq2")
 
+library(tidyverse)
 library(limma)
 library(edgeR)
-library(dplyr)
 ```
 
 `DGEList()` creates a Digital Gene Expression object from your count matrix. This is edgeR's core data structure and stores your counts along with sample and gene information.
@@ -871,11 +876,9 @@ Both_genes <- intersect_list$`Limma:DESeq2`
 :::
 
 
-```{r}
-#| echo: false
-#| eval: false
+<!--
 
-# Hello again future instructors! There is a back up file in results/ that was generated with:
+# Instructors! There is a back up file in results/ that was generated with:
 
 save(res_F_vs_TPM, file = "results/deseq2-FvsTPM.RData") 
 save(dds, file = "results/dds.RData")
@@ -894,4 +897,4 @@ save(dds, file = "results/dds.RData")
 [1] ‘3.68.2’
 > packageVersion("edgeR")
 [1] ‘4.10.0’
-```
+-->

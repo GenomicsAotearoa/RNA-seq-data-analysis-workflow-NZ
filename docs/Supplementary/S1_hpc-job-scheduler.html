@@ -271,22 +271,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Once we have confirmed the STAR alignment code works for our first sample, the next step would be to align all the samples to the genome. As this would take quite a while, we won’t do that in this workshop and we will instead supply the outputs for all samples. We could do all the alignments with a <em>for loop</em>, but as we have many samples and <em>for loops</em> run one sample at a time, this is not the most efficient way to do this. We need to write a slurm script as an array job and submit it to the HPC job scheduler (<em>i.e.,</em> SLURM on REANNZ) to allocate CPUs and memory for the job. We won’t be doing this in this workshop either, but you can see an example of a SLURM script below.</p>
 <p>First, make a <code>samples.txt</code> file that contains the basename of the files. This way we can extract the prefix we want for the outfiles in a way that works nicely with an array job.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> path/to/Trimmed/<span class="pp">*</span>_R1_trimmed.fq.gz <span class="kw">|</span> <span class="fu">xargs</span> <span class="at">-n1</span> basename <span class="kw">|</span> <span class="fu">sed</span> <span class="st">'s/_R1_trimmed\.fq\.gz//'</span> <span class="op">&gt;</span> samples.txt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-EDIT
-</div>
-</div>
-<div class="callout-body-container callout-body">
-
-</div>
-</div>
 <p>Note: this script assume you are currently in your alignment dir (where you want the star alignment results to go), which is where the <code>samples.txt</code> file will also go, and that your trimmed read files are in a directory called <code>../Trimmed</code> relative to your current directory.</p>
 <div class="callout callout-style-simple callout-note no-icon callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
 </div>
@@ -295,7 +282,7 @@ samples.txt example –&gt;
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> samples.txt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <pre class="output"><code>SI16_1G_lib56

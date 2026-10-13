@@ -182,7 +182,7 @@ The order that trimmomatic expects input and output files in a specific order, a
 - `LEADING:5` : Remove leading (5') low quality or N bases (below quality 3)   
 - `TRAILING:5` : Remove trailing (3') low quality or N bases (below quality 3)  
 - `SLIDINGWINDOW:4:15` :   
-- `MINLEN:36` : Drop reads below the 36 bases long (common threshold, but can adjust for your own data).    
+- `MINLEN:36` : Drop reads below the 36 bases long (common threshold, but can adjust for your own data). Have this flag last so that it is applied after all other trimming steps.      
 - `2> ${name}_trimmomatic.log` :  standard output redirected to log file. Optional, but can be used as input for multiqc.
 
 The `ADAPTERSDIR` is the path on REANNZ that contains the adapter files for Trimmomatic. You will need to adjust this path if you are using a different system. You can supply your own file containing the adapters if you wish. 

@@ -465,7 +465,7 @@ SOLUTION
 </p></li>
 <li><p><code>SLIDINGWINDOW:4:15</code> :<br>
 </p></li>
-<li><p><code>MINLEN:36</code> : Drop reads below the 36 bases long (common threshold, but can adjust for your own data).<br>
+<li><p><code>MINLEN:36</code> : Drop reads below the 36 bases long (common threshold, but can adjust for your own data). Have this flag last so that it is applied after all other trimming steps.<br>
 </p></li>
 <li><p><code>2&gt; ${name}_trimmomatic.log</code> : standard output redirected to log file. Optional, but can be used as input for multiqc.</p></li>
 </ul>

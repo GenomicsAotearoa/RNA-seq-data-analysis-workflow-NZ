@@ -20,11 +20,6 @@ First, make a `samples.txt` file that contains the basename of the files. This w
 ls path/to/Trimmed/*_R1_trimmed.fq.gz | xargs -n1 basename | sed 's/_R1_trimmed\.fq\.gz//' > samples.txt
 ```
 
-::: {.callout-warning}
-
-# EDIT
-
-:::
 
 Note: this script assume you are currently in your alignment dir (where you want the star alignment results to go), which is where the `samples.txt` file will also go, and that your trimmed read files are in a directory called `../Trimmed` relative to your current directory. 
 
