@@ -98,7 +98,7 @@ summary(counts)
 ```
 
 
-Zero counts are automatically removed during DEseq, but for visualisation purrposes we need to deal with them. You can either remove very low counts and/or add 1 to all counts (to prevent issues when logging counts of 0). 
+Zero counts sometimes need to be dealt with for differential expression (we'll get to this in the next section), but for visualisation purposes we often do need to filter them out manually. You can either remove very low counts and/or add 1 to all counts (to prevent issues when logging counts of 0).
 
 To remove all rows with 0 counts (genes where no sample has a read mapping to it), you could run something like this:
 
@@ -114,7 +114,12 @@ counts_filtered <- counts[rowSums(counts) > 0, ]
 
 ## Visualising our data set
 
+In this section, focus on what we are trying to *do* with the code rather than the code itself. If you can understand what we are trying to achieve by the visualisations, then you find your own way to do this in R. We are not going to focus on how ggplot2 works or the nuances of transforming data specifically for ggplot2. 
+
+
 ### Count distribution
+
+Let's first look at the distribution of counts across our samples. Boxplots can give as a quick visualisation of the gene expression distribution across samples. Depending on how different our samples are, we may or may not see major differences between the samples. 
 
 ```{r}
 
@@ -136,9 +141,9 @@ ggplot(counts_long, aes(x = sample, y = Counts)) +
 
 
 
-This figure indicates we should consider logging our data (for the purpose of visualisations).
+RNAseq raw count data can range from the 10s to 100,000s of reads mapped to a gene, which is highlighted by this figure. This indicates we should transform our data, and a good option for this is logging our data (for the purpose of visualisations).
 
-Log2 transform the data, adding 1 to avoid log(0) errors.
+Log transform the data, adding 1 to avoid log(0) errors.
 
 We use log2 for counts for RNAseq - more on why later!
 
@@ -176,7 +181,6 @@ A common question to ask at this point is, are the differences we can see betwee
 
 Library size refers to the total number of reads for the entire sample. If two samples have vastly different library sizes, genes would look differentially expressed between samples e.g., if one library was twice as large as another, all genes would look to be upregulated in the larger library sample. Before we compare counts across samples we need to check whether the library sizes are approximately similar, and if they are not, make a correction to account for the size differences.
 
-In this code below, focus on what we are trying to *do* with the code rather than the code itself. For each sample in our counts object, we are adding up the total counts across every gene to calculate the library size. There are different ways you could achieve this in R, but if you understand the end goal you can find your own path.  
 
 
 ```{r}

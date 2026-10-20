@@ -5,6 +5,9 @@ code-overflow: wrap
 
 # Functional analysis with a supported organism
 
+
+This is an excerpt from our other [RNAseq workshop that uses a yeast dataset](https://genomicsaotearoa.github.io/RNA-seq-data-analysis-workflow/) for GOSeq analysis, which has suported annotations via Bioconductor. 
+
 ### GOseq
 
 ::: {.callout-warning collapse="true"}

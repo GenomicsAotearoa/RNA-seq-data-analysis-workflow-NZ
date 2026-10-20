@@ -55,5 +55,8 @@
   },
   "Supplementary/S3_heatmap.qmd": {
     "S3_heatmap.html": "1fdc60c8"
+  },
+  "Supplementary/S4_data-manipulation-ggplot2.qmd": {
+    "S4_data-manipulation-ggplot2.html": "af051d8e"
   }
 }

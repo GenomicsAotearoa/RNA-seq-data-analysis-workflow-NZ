@@ -28,13 +28,13 @@ This workflow assumes you are familiar with transcriptomic and biological concep
 
 ## What's not covered in this workshop
 
-- Submitting and optimising HPC scheduled jobs (see Bash scripting and HPC Job Scheduler workshop)
+- Submitting and optimising HPC scheduled jobs (see [Bash scripting and HPC Job Scheduler](https://genomicsaotearoa.github.io/BioinformaticsTrainingProgramme/portfolio.html#bash-script-hpc-job) workshop)  
 - Extensive data manipulation and plotting in R, beyond the basics.  
 
 
 ## Setup
 
-During the workshop, code will be run in real-time to demonstrate the analysis. This will be run on the REANNZ OpenOnDemand platform which already has all the required software and R packages installed. 
+During the workshop, code will be run in real-time to demonstrate the analysis. This will be run on the REANNZ Open OnDemand platform which already has all the required software and R packages installed. 
 
 
 ## Attribution notice

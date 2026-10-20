@@ -572,7 +572,7 @@ emapplot(cp_result_sim,
 
 ### Investigate the under-represented GO terms 
 
-Underrepresented GO terms can be just as interesting as overrepresented GO terms. It can give you a good idea of what functions are depleted in your sample/s, compared to your background. 
+Underrepresented GO terms can be just as interesting as overrepresented GO terms. It can give you a good idea of what functions are depleted in your samples, compared to your background. 
 
 
 ### Additional resources

@@ -3,7 +3,7 @@ project:
   output-dir: docs
 
 website:
-  title: "RNA-seq data analysis workflow (NZ)"
+  title: "RNA-seq data analysis workflow (NZ wrasse)"
   favicon: theme_images/GA-image-black-favicon.png
   open-graph: true # https://quarto.org/docs/websites/website-tools.html#open-graph
   sidebar:
@@ -27,6 +27,7 @@ website:
           - Supplementary/S1_hpc-job-scheduler.qmd
           - Supplementary/S2_functional.qmd
           - Supplementary/S3_heatmap.qmd
+          - Supplementary/S4_data-manipulation-ggplot2.qmd 
 
 
     tools:
