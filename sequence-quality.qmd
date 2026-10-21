@@ -129,7 +129,7 @@ To generate the MultiQC report first navigate to the RNA_seq directory and creat
 ```bash
 cd ~/RNA_seq/
 
-mkdir MultiQC && cd $_
+mkdir MultiQC && cd MultiQC
 
 ```
 
@@ -195,7 +195,7 @@ The `ADAPTERSDIR` is the path on REANNZ that contains the adapter files for Trim
 ```bash
 cd ~/RNA_seq
 
-mkdir Trimmed && cd $_
+mkdir Trimmed && cd Trimmed
 ```
 
 

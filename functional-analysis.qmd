@@ -217,10 +217,11 @@ geneOntologies <- read.delim("data-files/geneontologies.txt", header = TRUE, sep
 
 geneLengths <-  read.delim("DataFiles/genelengths.txt", header = TRUE, sep = "\t")
 geneOntologies <- read.delim("DataFiles/geneontologies.txt", header = TRUE, sep = "\t")
-
-geneLengths |> head()
 ```
 
+```{r}
+geneLengths |> head()
+```
 
 
 The gene lengths object should be a dataframe, and needs to have one column with the GeneIDs (must match the geneIDs in your alignment/counts files) and one column with the length of the gene. We typically use the union exon length as a proxy for the gene length (*i.e.,* add together the number of bps in each exon). 

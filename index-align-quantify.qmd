@@ -139,7 +139,7 @@ Let's first make a new dir in RNA_seq called Align
 ```bash
 cd ~/RNA_seq
 
-mkdir Align && cd $_
+mkdir Align && cd Align
 ```
 
 Let's run the script (this will take **approximately 12 minutes to run**), and as it's going, talk about some of the flags we used:  

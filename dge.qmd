@@ -194,7 +194,7 @@ before fitting your model is good practice to confirm each batch contains a mix 
 ::: {.callout-warning collapse="true" appearance="minimal"}
 # 🤓 Extra for experts: model matrix design
 
-These three lines all fit the *same underlying model*  – the same variance explained, the same fitted values, but they parameterise it differently, which changes what your coefficients mean and how you write contrasts.
+These three lines all fit the same underlying model – the same variance explained, the same fitted values, but they parameterise it differently, which changes what your coefficients mean and how you write contrasts.
 
 ```{r}
 #| eval: false
@@ -208,7 +208,7 @@ design <- model.matrix(~histology + batchname, data = coldata)
 
 - **`~1 + histology + batchname`** and **`~histology + batchname`**  – these two are identical to each other (`~1` is R's default and is added automatically if you don't write `~0`). Both produce an intercept column plus one column per *extra* histology level: `(Intercept)`, `histologyMT`, `histologyTPM`. Here, the intercept absorbs the reference level (F, since that's first in `levels = c("F", "MT", "TPM")`), and `histologyMT`/`histologyTPM` are *already* contrasts against F  – *i.e.,* `histologyMT` directly means "MT minus F". You'd still need `makeContrasts()` to get `TPM_vs_MT`, since that comparison isn't a direct column in this parameterisation.
 
-**Practical difference:** with the intercept form, two of your three pairwise comparisons come "for free" as model coefficients, and you only need `makeContrasts()` for the third. With the no-intercept form, all comparisons are equally explicit and all need to be written in `makeContrasts()`  – nothing is hidden behind an implicit reference group. For teaching, we prefer `~0 +` because "F is the reference" isn't a fact you need to remember and get right every time  – it's spelled out in the contrast itself. But you'll see the intercept form very often in the literature and in other people's scripts, so it's worth being able to recognise both.
+**The difference:** with the intercept form, two of your three pairwise comparisons come "for free" as model coefficients, and you only need `makeContrasts()` for the third. With the no-intercept form, all comparisons are equally explicit and all need to be written in `makeContrasts()`  – nothing is hidden behind an implicit reference group. For teaching, we prefer `~0 +` because "F is the reference" isn't a fact you need to remember and get right every time  – it's spelled out in the contrast itself. But you'll see the intercept form very often in the literature and in other people's scripts, so it's worth being able to recognise both.
 
 :::
 
@@ -455,7 +455,7 @@ nrow(sigGenesLimma_allDE) == nrow(sigGenesLimma_up) + nrow(sigGenesLimma_down)
 :::
 
 
-### Volcano plots
+### Volcano plots 🌋
 
 Volcano plots are a useful and commonly used method to visualise differentially expressed genes within your data set.
 
@@ -488,19 +488,19 @@ library(dplyr)
 pval_threshold <- 0.05
 fc_threshold <- 1  # log2 fold change threshold
 
-# Create a data frame for plotting - CHANGE tt OBJECT NAME TO MATCH YOUR DATA
+# Create a data frame for plotting and create categories for labelling
 plot_data <- data.frame(
   logFC = tt_TPM_vs_F$logFC,
-  negLogPval = -log10(tt_TPM_vs_F$P.Value),
+  negLogPval = -log10(tt_TPM_vs_F$adj.P.Val),
   adj.P.Val = tt_TPM_vs_F$adj.P.Val,
   ID = rownames(tt_TPM_vs_F)  # Assuming row names are gene IDs
-)
-
-# Add a column to categorize genes
-plot_data$category <- ifelse(plot_data$adj.P.Val <= pval_threshold,
-                             ifelse(plot_data$logFC >= fc_threshold, "Upregulated",
-                                    ifelse(plot_data$logFC <= -fc_threshold, "Downregulated", "Passes P-value cut off")),
-                             "Not Significant")
+) |>
+  mutate(category = case_when(
+    adj.P.Val <= pval_threshold & logFC >=  fc_threshold ~ "Upregulated",
+    adj.P.Val <= pval_threshold & logFC <= -fc_threshold ~ "Downregulated",
+    adj.P.Val <= pval_threshold                          ~ "Passes P-value cut-off",
+    TRUE                                                 ~ "Not significant"
+  ))
 
 ```
 
@@ -509,22 +509,27 @@ library(ggplot2)
 library(ggiraph)
 
 # Create the volcano plot using ggplot2
-ggplot(plot_data, aes(x = logFC, y = negLogPval, color = category)) +
+ggplot(plot_data, aes(x = logFC, y = negLogPval, colour = category)) +
   geom_point(alpha = 0.6, size = 1.5) +
-  scale_color_manual(values = c("Upregulated" = "red", "Downregulated" = "blue", "Not Significant" = "grey20", "Passes P-value cut off" = "grey")) +
+  scale_colour_manual(values = c(
+    "Upregulated"           = "red",
+    "Downregulated"         = "blue",
+    "Passes P-value cut-off" = "grey40",
+    "Not significant"       = "grey80"
+  )) +
   geom_vline(xintercept = c(-fc_threshold, fc_threshold), linetype = "dashed") +
   geom_hline(yintercept = -log10(pval_threshold), linetype = "dashed") +
   labs(
-    title = "Volcano Plot of Differential Gene Expression",
-    subtitle = paste("Thresholds: |log2FC| >", fc_threshold, "and adjusted p-value <", pval_threshold),
+    title    = "Volcano Plot of Differential Gene Expression",
+    subtitle = paste("Thresholds: |log2FC| >=", fc_threshold,
+                     "and adjusted p-value <=", pval_threshold),
     x = "log2 Fold Change",
-    y = "-log10(p-value)",
-    color = "Differential Expression"
+    y = "-log10(adjusted p-value)",
+    colour = "Differential Expression"
   ) +
   theme_minimal() +
   theme(
-    legend.position = "right",
-    plot.title = element_text(hjust = 0.5, size = 16),
+    plot.title    = element_text(hjust = 0.5, size = 16),
     plot.subtitle = element_text(hjust = 0.5, size = 12)
   )
 ```
@@ -572,22 +577,27 @@ We can also produce an interactive volcano plot with the ggigraph package.
 ```{r}
 
 # Create the ggplot object
-p <- ggplot(plot_data, aes(x = logFC, y = negLogPval, color = category, text = ID)) +
-  geom_point(alpha = 0.6, size = 2) +
-  scale_color_manual(values = c("Upregulated" = "red", "Downregulated" = "blue", "Not Significant" = "grey20", "Passes P-value cut off" = "grey")) +
+p <- ggplot(plot_data, aes(x = logFC, y = negLogPval, colour = category, text = ID)) +
+  geom_point(alpha = 0.6, size = 1.5) +
+  scale_colour_manual(values = c(
+    "Upregulated"           = "red",
+    "Downregulated"         = "blue",
+    "Passes P-value cut-off" = "grey40",
+    "Not significant"       = "grey80"
+  )) +
   geom_vline(xintercept = c(-fc_threshold, fc_threshold), linetype = "dashed") +
   geom_hline(yintercept = -log10(pval_threshold), linetype = "dashed") +
   labs(
-    title = "Interactive Volcano Plot of Differential Gene Expression",
-    subtitle = paste("Thresholds: |log2FC| >", fc_threshold, "and adjusted p-value <", pval_threshold),
+    title    = "Volcano Plot of Differential Gene Expression",
+    subtitle = paste("Thresholds: |log2FC| >=", fc_threshold,
+                     "and adjusted p-value <=", pval_threshold),
     x = "log2 Fold Change",
-    y = "-log10(p-value)",
-    color = "Differential Expression"
+    y = "-log10(adjusted p-value)",
+    colour = "Differential Expression"
   ) +
   theme_minimal() +
   theme(
-    legend.position = "right",
-    plot.title = element_text(hjust = 0.5, size = 16),
+    plot.title    = element_text(hjust = 0.5, size = 16),
     plot.subtitle = element_text(hjust = 0.5, size = 12)
   )
 ```
@@ -599,7 +609,7 @@ library(ggiraph)
 library(plotly)
 
 # Convert ggplot to an interactive plotly object
-interactive_plot <- ggplotly(p, tooltip = c("text", "x", "y", "color"))
+interactive_plot <- ggplotly(p, tooltip = c("text", "x", "y", "colour"))
 
 # Customize hover text
 interactive_plot <- interactive_plot |> 
@@ -618,6 +628,22 @@ Hover with your mouse over the points above to see pop up boxes with gene names,
 ## Identifying differentially expressed genes using DESeq2
 
 DESeq2 is a highly-regarded R package for analysing RNA-seq data. DESeq2 uses a [negative binomial](https://en.wikipedia.org/wiki/Negative_binomial_distribution) method to model the count data, and combines this with a generalised linear model (GLM) to identify differentially expressed genes. For more about the DESeq2 package, you can [read the original article](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0550-8).
+
+
+::: {.callout-note  collapse="true"}
+# Starting here and need to load in the data?
+
+Run this code, which includes a checkpoint:
+
+```{r}
+coldata <- read.table("https://raw.githubusercontent.com/GenomicsAotearoa/RNA-seq-data-analysis-workflow-NZ/refs/heads/main/data-files/coldata.txt", sep="\t", header=TRUE)
+counts  <- read.table("https://raw.githubusercontent.com/GenomicsAotearoa/RNA-seq-data-analysis-workflow-NZ/refs/heads/main/data-files/counts.txt",  sep="\t", header=TRUE, row.names=1)
+coldata <- coldata[match(colnames(counts), coldata$sample), ] # force columns into same sample order
+identical(colnames(counts), coldata$sample) # must be TRUE
+```
+
+:::
+
 
 ### The DESeq2 object
 
@@ -806,6 +832,107 @@ The default BH method is Benjamini & Hochberg (or the FDR method), which is desc
 :::
 
 
+#### Volcano plot for DESeq2 🌋
+
+::: {.callout-important appearance="minimal" collapse="false"}
+# Optional: Re-create volcano plot using DESeq2 data instead
+
+```{r}
+
+library(dplyr)
+library(ggplot2)
+library(ggiraph)
+library(plotly)
+
+# Set up data
+pval_threshold <- 0.05
+fc_threshold   <- 1  
+
+plot_data <- as.data.frame(res_F_vs_TPM) |>
+  tibble::rownames_to_column("ID") |>
+  mutate(
+    logFC      = log2FoldChange,
+    negLogAdjPval = -log10(padj),
+    category = case_when(
+      padj <= pval_threshold & logFC >=  fc_threshold ~ "Upregulated",
+      padj <= pval_threshold & logFC <= -fc_threshold ~ "Downregulated",
+      padj <= pval_threshold                          ~ "Passes P-value cut-off",
+      TRUE                                            ~ "Not significant"
+    )
+  )
+
+# Create plot
+p <- ggplot(plot_data, aes(x = logFC, y = negLogAdjPval, colour = category, text = ID)) +
+  geom_point(alpha = 0.6, size = 1.5) +
+  scale_colour_manual(values = c(
+    "Upregulated"           = "red",
+    "Downregulated"         = "blue",
+    "Passes P-value cut-off" = "grey40",
+    "Not significant"       = "grey80"
+  )) +
+  geom_vline(xintercept = c(-fc_threshold, fc_threshold), linetype = "dashed") +
+  geom_hline(yintercept = -log10(pval_threshold), linetype = "dashed") +
+  labs(
+    title    = "Volcano Plot of Differential Gene Expression",
+    subtitle = paste("Thresholds: |log2FC| >=", fc_threshold,
+                     "and adjusted p-value <=", pval_threshold),
+    x = "log2 Fold Change",
+    y = "-log10(adjusted p-value)",
+    colour = "Differential Expression"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title    = element_text(hjust = 0.5, size = 16),
+    plot.subtitle = element_text(hjust = 0.5, size = 12)
+  )
+
+
+# Convert ggplot to an interactive plotly object
+interactive_plot <- ggplotly(p, tooltip = c("text", "x", "y", "colour"))
+
+# Customise hover text
+interactive_plot <- interactive_plot |> 
+  layout(hoverlabel = list(bgcolor = "white"),
+         hovermode = "closest")
+
+# Display the interactive plot
+interactive_plot
+
+
+```
+
+##### EXERCISE 🧠🏋️‍♀️ (2 min)
+
+Which group is the upregulated group in this plot? F or TPM? Is this the same as our Limma plot earlier?
+
+::: {.callout-tip collapse="true" appearance="minimal"}
+# SOLUTION
+
+Hover over the upregulated genes and pick one to check its original counts.
+
+In this example, we've picked the gene "snx10a", which is the red dot at the very top of the upregulated gene points on the plot!
+
+```{r}
+
+gene <- "snx10a"
+
+t(counts[gene,]) |> 
+  as.data.frame() |> 
+  tibble::rownames_to_column("sample") |> 
+  left_join(coldata, by="sample") |> 
+  select(sample,all_of(gene), histology) |> 
+  filter(histology %in% c("F", "TPM"))
+```
+
+We can see this gene is more highly expressed in the F group, therefore upregulated in this context means upregulated in females (compared to males). 
+
+In our Limma example, upregulated referred to TPM. They are the opposite! This is something to always be on the lookout for, as which group is the upregulated group depends on how your comparisons were set up. 
+
+:::
+ 
+
+
+:::
 
 
 ### Differentially expressed gene lists
