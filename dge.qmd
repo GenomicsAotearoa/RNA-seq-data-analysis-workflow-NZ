@@ -834,7 +834,7 @@ The default BH method is Benjamini & Hochberg (or the FDR method), which is desc
 
 #### Volcano plot for DESeq2 🌋
 
-::: {.callout-important appearance="minimal" collapse="false"}
+::: {.callout-important appearance="minimal" collapse="true"}
 # Optional: Re-create volcano plot using DESeq2 data instead
 
 ```{r}
