@@ -633,11 +633,17 @@ DESeq2 is a highly-regarded R package for analysing RNA-seq data. DESeq2 uses a 
 ::: {.callout-note  collapse="true"}
 # Starting here and need to load in the data?
 
-Run this code, which includes a checkpoint:
+Run this code to load in the data: 
 
 ```{r}
+#| eval: false 
+
 coldata <- read.table("https://raw.githubusercontent.com/GenomicsAotearoa/RNA-seq-data-analysis-workflow-NZ/refs/heads/main/data-files/coldata.txt", sep="\t", header=TRUE)
 counts  <- read.table("https://raw.githubusercontent.com/GenomicsAotearoa/RNA-seq-data-analysis-workflow-NZ/refs/heads/main/data-files/counts.txt",  sep="\t", header=TRUE, row.names=1)
+```
+
+CHECKPOINT: coldata and counts must be the same sample order!
+```{r}
 coldata <- coldata[match(colnames(counts), coldata$sample), ] # force columns into same sample order
 identical(colnames(counts), coldata$sample) # must be TRUE
 ```

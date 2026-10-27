@@ -42,6 +42,7 @@ Run the code below to load the file:
 
 ```{r}
 #| eval: false
+setwd("~/RNA_seq")
 
 coldata <- read.table("DataFiles/coldata.txt", sep="\t", header=TRUE)
 counts  <- read.table("DataFiles/counts.txt",  sep="\t", header=TRUE, row.names=1)
@@ -162,7 +163,9 @@ ggplot(counts_long_metadata, aes(
   y = log2(Counts + 1),
   fill = histology)) +
   geom_boxplot() +
-  labs(x = "Samples", y = "Log Counts +1") +
+  labs(x = "Samples", 
+       y = "Log Counts +1",
+       title = "Count distribution") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -271,7 +274,7 @@ Now we are ready to plot our data, which we can do using a ggplot scatterplot. T
 
 ```{r}
 
-ggplot(pca_data, aes(x = PC1, y = PC2, colour = histology)) +
+ggplot(pca_data, aes(x = PC1, y = PC2, colour = histology, shape = batchname)) +
   geom_point(size = 4) +
   labs(x = paste0("PC1: ", pct_var[1], "% variance"),
        y = paste0("PC2: ", pct_var[2], "% variance")) +
@@ -288,9 +291,11 @@ The next thing we should investigate is **batch effect**. We have two different 
 
 ```{r}
 
+library(ggrepel)
+
 ggplot(pca_data, aes(x = PC1, y = PC2, colour = histology, shape = batchname)) +
   geom_point(size = 4) +
-  geom_text(aes(label = sample), nudge_y = 15, size = 3) +
+  geom_text_repel(aes(label = sample), size = 3, max.overlaps = Inf) +
   labs(x = paste0("PC1: ", pct_var[1], "% variance"),
        y = paste0("PC2: ", pct_var[2], "% variance")) +
   theme_classic()

@@ -200,7 +200,7 @@ mkdir Trimmed && cd Trimmed
 
 
 ```bash
-ADAPTERSDIR="/opt/nesi/CS400_centos7_bdw/Trimmomatic/0.39-Java-1.8.0_144/adapters" 
+ADAPTERSDIR="../adapters" 
 FILEDIR="../RawReads"
 UNPAIREDDIR="unpaired"
 

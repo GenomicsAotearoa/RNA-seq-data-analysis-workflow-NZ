@@ -10,7 +10,7 @@ code-overflow: wrap
 
 In order to draw conclusions about gene expression from our reads, we need to first identify which region of the genome reads originated from and then quantify the number of reads from that region. There are many tools available to carry out quantification, and we will not cover the arguments for and against each tool. We encourage you to carry out a literature search, and discuss with experienced individuals in your field, before committing to a particular quantification procedure. Here we will give a brief overview of two approaches with considerably different underlying methodology, give an example tool for each, and then demonstrate one tool for the purpose of progressing to the next stage of our workflow.
 
-The first approach to read quantification involves aligning reads to the genome first, and then counting the number of reads that are aligned to certain genomic features (*e.g.,* exons). This method may generally be referred to as the 'count' method, but it is still a form of quantification, and the output is by default at the gene level.  
+The first approach to read quantification involves aligning reads to the genome first, and then counting the number of reads that are aligned to certain genomic features (*e.g.,* exons). This method may generally be referred to as the 'count' method, but it is still a form of quantification, and the output is by default at the gene level.  This is the approach we are doing in this workshop.  
 
 The second approach, which we will not do today, involves creating transcript expression estimates via pseudoalignment, often referred to informally as 'pseudocounts'. In this method, reads are *not* aligned to the genome. Instead, they are pseudoaligned to kmers within the transcriptome and their abundance is estimated. While the output for these tools (e.g., Kallisto, Salmon) are by default at a transcript level, they can be converted to a gene level expression estimate.  
 
@@ -52,7 +52,7 @@ Run this code below, and lets consider the following scenario as its running:
 
 
 ```bash
-STAR --runMode genomeGenerate --genomeDir . --genomeFastaFiles GCF_009762535.1_fNotCel1.pri_genomic.fna   --sjdbGTFfile GCF_009762535.1_fNotCel1.pri_genomic.gtf  --sjdbOverhang 124  --genomeSAindexNbases 13 
+STAR --runMode genomeGenerate --genomeDir . --genomeFastaFiles GCF_009762535.1_fNotCel1.pri_genomic.fna   --sjdbGTFfile GCF_009762535.1_fNotCel1.pri_genomic.gtf  --sjdbOverhang 124  --genomeSAindexNbases 11 
 ```
 
 
@@ -142,7 +142,7 @@ cd ~/RNA_seq
 mkdir Align && cd Align
 ```
 
-Let's run the script (this will take **approximately 12 minutes to run**), and as it's going, talk about some of the flags we used:  
+Let's run the script (this will take **approximately 15 minutes to run**), and as it's going, talk about some of the flags we used:  
 
 ```bash
 
