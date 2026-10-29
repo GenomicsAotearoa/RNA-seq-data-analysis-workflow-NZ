@@ -11,7 +11,7 @@ Are those two groups *significantly different* from one another is a challenging
 
 ## T-tests and p-values
 
-The statistical approach to this question is to begin with the null hypothesis (that there is no difference between the two groups) and test whether or not you can reject the null.
+The statistical approach to this question is to begin with the null hypothesis (that there is no difference between the two groups) and test whether or not you can reject the null hypothesis.
 
 To test whether or not we can reject the null hypothesis we can calculate a test statistic:
 
@@ -72,11 +72,11 @@ Note down some key features of your experiment. Are you more inclined to use FWE
 
 :::
 
-### Modifying the t-test for RNA-seq
+### Modifying the t-test and variance shrinkage for RNA-seq
 
-Many biological experiments struggle with getting enough samples for statistical significance. In RNA-seq experiments it is common to see groups of three samples or replicates. This is especially problematic when using the t-test (or similar procedures that involve variance). When testing for differences in gene expression it is possible to encounter genes with a small difference in the mean between the two groups and, due to the small sample size, a *very* small level of variation (a small standard error). A small difference in the means divided by a *very small* standard error translates to a large test statistic, which is then translated to a small p-value and what **looks** like a highly significant result.
+Many biological experiments struggle with getting enough samples for statistical significance. In RNA-seq experiments it is common to see groups of three samples or replicates. This is especially problematic when using the t-test or similar procedures that involve variance. When testing for differences in gene expression it is possible to encounter genes with a small difference in the mean between the two groups and, due to the small sample size, a *very* small level of variation (a small standard error). A small difference in the means divided by a *very small* standard error translates to a large test statistic, which is then translated to a small p-value and what **looks** like a highly significant result.
 
-Since this issue is caused by an artificially low standard error due to low sample numbers, a number of methods have proposed artificially increasing the standard error in some way. One way to implement this is through Shrinkage Estimation, which involves using Empirical Bayes methods to adjust individual test statistics based on the overall distribution of variances. During shrinkage estimation, small standard errors are made larger while large standard errors are made smaller.
+Since this issue is caused by an artificially low standard error (unreliable variance estimates) due to low sample numbers, a number of methods stabilise the standard error in some way. One way to implement this is through shrinkage estimation, which involves using Empirical Bayes methods to adjust the variance estimates of individual genes based on the overall distribution of variances. During shrinkage estimation, small variances are made larger while large variances are made smaller. Limma applies this directly to the variance in a moderated t-test. DESeq2 models counts with a negative binomial distribution and instead shrinks the gene-wise dispersion toward a mean-dependent trend, then tests with GLM (generalised linear model) based tests. 
 
 ## Identifying differentially expressed genes using LIMMA
 
@@ -214,7 +214,7 @@ design <- model.matrix(~histology + batchname, data = coldata)
 
 
 
-### Addressing heteroscedasticity with Limma
+### Addressing heteroscedasticity with limma
 
 Limma has a function called voom which we can use to address heteroscedasticity (a case where mean and variance are not independent). Voom will estimate the strength of the relationship between mean and variance and calculate "precision weights" for each gene. These are then used to normalise the data during the identification of differentially expressed genes.
 
@@ -289,7 +289,7 @@ fit <- lmFit(v, design)
 ```
 
 
-Now we need to define the contrasts. This is where you will have to do some editting for your own samples. For each comparison that you want to test, you will need to define a contrast. In this example, we have three histology groups (F, MT, TPM) and we want to compare each of them to one another. We will define three contrasts: MT vs F, TPM vs F, and TPM vs MT. It does not matter which order you define the contrast, but it is important to be consistent with your definition of the contrast when interpreting the results. For example, if you define MT vs F as `histologyMT - histologyF`, then a positive log fold change (logFC) value will indicate that the gene is upregulated in MT relative to F, while a negative logFC value will indicate that the gene is downregulated in MT relative to F. 
+Now we need to define the contrasts. This is where you will have to do some editing for your own samples. For each comparison that you want to test, you will need to define a contrast. In this example, we have three histology groups (F, MT, TPM) and we want to compare each of them to one another. We will define three contrasts: MT vs F, TPM vs F, and TPM vs MT. It does not matter which order you define the contrast, but it is important to be consistent with your definition of the contrast when interpreting the results. For example, if you define MT vs F as `histologyMT - histologyF`, then a positive log fold change (logFC) value will indicate that the gene is upregulated in MT relative to F, while a negative logFC value will indicate that the gene is downregulated in MT relative to F. 
 
 The names on the left can be anything you want (*e.g.,* "MT_vs_F" could be "MidTrans_vs_Fem"), but the names on the right must match the column names of your design matrix exactly (*e.g.,* "histologyMT", "histologyF"). You can check the column names of your design matrix by running `colnames(design)`.
 
