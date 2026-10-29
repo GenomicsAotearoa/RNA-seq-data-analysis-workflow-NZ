@@ -66,7 +66,7 @@ Note down some key features of your experiment. Are you more inclined to use FWE
 
 - Are you working with clinical samples, where the stakes are higher if you implicate the wrong gene in disease?  
 - Are you investigating trends in expression or looking for specific genes?   
-- How radical is your treatment or conditions used in your epxeriment? Do you have any assumptions about how perturbed or different you expect gene epxression to be between sample groups?  
+- How radical is your treatment or conditions used in your experiment? Do you have any assumptions about how perturbed or different you expect gene expression to be between sample groups?  
 - How many biological replicates do you have? Smaller sample sizes reduce statistical power, making you more prone to Type II errors regardless of which correction you apply.
 
 
