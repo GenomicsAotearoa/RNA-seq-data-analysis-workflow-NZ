@@ -341,7 +341,7 @@ SOLUTION
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>--genomeFastaFiles GCF_009762535.1_fNotCel1.pri_genomic.fna <span class="dt">\</span></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>--sjdbGTFfile GCF_009762535.1_fNotCel1.pri_genomic.gtf <span class="dt">\</span></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>--sjdbOverhang <span class="op">&lt;</span>int<span class="op">&gt;</span> <span class="dt">\ </span> <span class="co"># change</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="ex">--genomeSAindexNbases</span> 14  <span class="co"># not change</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="ex">--genomeSAindexNbases</span> 11  <span class="co"># not change</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
@@ -401,19 +401,18 @@ DONE: Genome generation, EXITING</code></pre>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> Align <span class="kw">&amp;&amp;</span> <span class="bu">cd</span> Align</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Let’s run the script (this will take <strong>approximately 15 minutes to run</strong>), and as it’s going, talk about some of the flags we used:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Set shell variables</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="va">genomedir</span><span class="op">=</span><span class="st">"../Genome"</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="va">trimmeddir</span><span class="op">=</span><span class="st">"../Trimmed"</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> files <span class="kw">in</span> <span class="va">$trimmeddir</span>/<span class="pp">*</span>R1_trimmed.fq.gz</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="cf">do</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="va">name</span><span class="op">=</span><span class="va">$(</span><span class="fu">basename</span> <span class="va">$files</span> _R1_trimmed.fq.gz<span class="va">)</span> </span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co"># run STAR to align reads to the genome    </span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="ex">STAR</span> <span class="at">--runMode</span> alignReads <span class="at">--genomeDir</span> <span class="va">$genomedir</span> <span class="at">--readFilesIn</span> <span class="va">${trimmeddir}</span>/<span class="va">${name}</span>_R1_trimmed.fq.gz <span class="va">${trimmeddir}</span>/<span class="va">${name}</span>_R2_trimmed.fq.gz <span class="at">--readFilesCommand</span> zcat <span class="at">--outSAMtype</span> BAM SortedByCoordinate <span class="at">--outFileNamePrefix</span> <span class="va">${name}</span> <span class="at">--runThreadN</span> 2 <span class="at">--quantMode</span> GeneCounts</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set shell variables</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="va">genomedir</span><span class="op">=</span><span class="st">"../Genome"</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="va">trimmeddir</span><span class="op">=</span><span class="st">"../Trimmed"</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> files <span class="kw">in</span> <span class="va">$trimmeddir</span>/<span class="pp">*</span>R1_trimmed.fq.gz</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="cf">do</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="va">name</span><span class="op">=</span><span class="va">$(</span><span class="fu">basename</span> <span class="va">$files</span> _R1_trimmed.fq.gz<span class="va">)</span> </span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co"># run STAR to align reads to the genome    </span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="ex">STAR</span> <span class="at">--runMode</span> alignReads <span class="at">--genomeDir</span> <span class="va">$genomedir</span> <span class="at">--readFilesIn</span> <span class="va">${trimmeddir}</span>/<span class="va">${name}</span>_R1_trimmed.fq.gz <span class="va">${trimmeddir}</span>/<span class="va">${name}</span>_R2_trimmed.fq.gz <span class="at">--readFilesCommand</span> zcat <span class="at">--outSAMtype</span> BAM SortedByCoordinate <span class="at">--outFileNamePrefix</span> <span class="va">${name}</span> <span class="at">--runThreadN</span> 2 <span class="at">--quantMode</span> GeneCounts</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Flags in this script:</p>
 <ul>
 <li><p><code>--readFilesCommand zcat</code> : this flag with zcat argument allows STAR to process .gz files. Best to keep your reads as compressed files, but if they are not .gz then omit this flag.<br>
@@ -543,8 +542,7 @@ Log.final.out file –&gt;
 <p><strong>Multi-mapping reads</strong>: Generally you want this to be low, but as mentioned above, if you have a repetitive or highly polyploid genome this may be expected. There are two parameters to look at here:<br>
 <em>% of reads mapped to multiple loci</em> – multi-mapping reads. Not counted in default gene counts output. Can adjust flags during alignment to count these if desired, but this does get more complex. Read the section ‘5.2.1 Multimappers’ in the STAR manual.<br>
 <em>% of reads mapped to too many loci</em> – these reads exceeded the value given for the <code>--outFilterMultimapNmax</code> flag (or the default value of 10 if flag not specified during alignment) and these alignments are discarded.</p>
-<p><strong>Unmapped reads</strong><br>
-All reads that did not map to the genome. This is broken up into three categories – too many mismatches, too short or other. In total you would expect these values to be small (<em>e.g.,</em> &lt;5%). Mismatches could be handled by changing alignment flags (mentioned earlier), but if this number is particularly high (<em>e.g.,</em> &gt;10%), you may need to consider whether the reference genome you are using is appropriate, or if there is some other biological or technical reason your reads have many base pair mismatches. Reads that are too short could be from over-trimming. You may need to filter your trimmed reads to remove any below a threshold (<em>e.g.,</em> discard all reads shorter than 36bp is a common cut-off; Trimmomatic has the option MINLEN).</p>
+<p><strong>Unmapped reads</strong>: All reads that did not map to the genome. This is broken up into three categories – too many mismatches, too short or other. In total you would expect these values to be small (<em>e.g.,</em> &lt;5%). Mismatches could be handled by changing alignment flags (mentioned earlier), but if this number is particularly high (<em>e.g.,</em> &gt;10%), you may need to consider whether the reference genome you are using is appropriate, or if there is some other biological or technical reason your reads have many base pair mismatches. Reads that are too short could be from over-trimming. You may need to filter your trimmed reads to remove any below a threshold (<em>e.g.,</em> discard all reads shorter than 36bp is a common cut-off; Trimmomatic has the option MINLEN).</p>
 <section id="discussion-2-mins" class="level5">
 <h5 class="anchored" data-anchor-id="discussion-2-mins">DISCUSSION 🤔 (2 mins)</h5>
 <p>What do you think of the mapping statistics for the Log.final.out file provided above? Was this a good alignment?</p>

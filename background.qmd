@@ -47,35 +47,34 @@ There are two major approaches to measure gene expression from reads: in the fir
 
 ### Library sizes and composition
 
-Due to myriad biological and technical effects, each sample will have differing numbers of total reads (different library sizes). When we attempt to compare gene expression across samples, these different library sizes can cause genes to be over- or under-expressed. Before we can compare samples we must correct for library size differences. 
+Due to a myriad of biological and technical effects, each sample will have different total number of reads (sequencing depth), different numbers of those reads are assigned to genes (library size) and genes themselves can skew the counts for other genes within a sample due to different proportions of mapped reads (library composition). When we attempt to compare gene expression across samples, without correcting for these differences we would erroneously conclude which genes are over- or under-expressed. Before we can compare samples we must correct for these differences. 
 
-Additionally, we need to be aware of library composition. If a library has one (or a few) genes that are very highly expressed, they can be thought of as 'taking up' a high proportion of the total library of reads. If we compare this skewed library with another library, some genes may look down-regulated in the skewed library. Here is a great resource on [different ways to normalise counts](https://hbctraining.github.io/Intro-to-DGE/lessons/02_DGE_count_normalization.html), which can account for  library size and/or composition, produced by the [Harvard Chan Bioinformatics Core.](https://github.com/hbctraining/Intro-to-DGE). 
+The [Harvard Chan Bioinformatics Core](https://github.com/hbctraining) have great resources on [different ways to normalise counts](https://hbctraining.github.io/Intro-to-DGE/lessons/02_DGE_count_normalization.html), including methods that account for library size, composition, or both.
 
 ### Heteroscedasticity
 
-[Heteroscedasticity](https://en.wikipedia.org/wiki/Homoscedasticity_and_heteroscedasticity) describes a situation where variance changes with the mean, as opposed to homoscedasticity, where variance does not change with the mean. In RNA-seq data the level of variance associated with each gene is dependent on the mean expression level of the gene (*i.e,.* RNAseq data is heteroscedastic). This is an issue since some statistical approaches (specifically, the Poisson distribution) assume homoscedasticity (that is, that variance is not associated with the mean). 
+[Heteroscedasticity](https://en.wikipedia.org/wiki/Homoscedasticity_and_heteroscedasticity) describes a situation where variance changes with the mean, as opposed to homoscedasticity, where variance does not change with the mean. In RNA-seq data the level of variance associated with each gene is dependent on the mean expression level of the gene (*i.e.,* RNAseq data is heteroscedastic). This is an issue because some statistical approaches assume constant variance, which is not appropriate for raw RNAseq count data.   
 
-Two approaches to dealing with heteroscedasticity are common in the literature: transform the data to reduce (or remove) the mean-variance association or use a method that is robust to the mean-variance association ([DESeq2](https://doi.org/10.1186/s13059-014-0550-8) with the Negative Binomial distribution). 
+Two approaches to dealing with heteroscedasticity are common in the literature: transform the data to reduce (or remove) the mean-variance association, or use a method that models the mean-variance association. The first is the approach taken by limma, which uses the voom method to convert counts to log-scale values and give noisier (typically low-count) observations less weight in a linear model. The second is the approach taken by [DESeq2](https://doi.org/10.1186/s13059-014-0550-8) and edgeR, which model the counts directly using the Negative Binomial distribution.
 
 This [write-up](https://github.com/friedue/Notes/blob/master/RNA_heteroskedasticity.md) gives an in-depth explanation of heteroscedasticity and how we can think about it.
 
+
 #### **Discussion** 🤔 
 
-Do you expect genes with higher mean expression to have higher or lower variance than genes with low expression? That is, which will have *higher variance* - genes with high average expression or genes with low average expression?
+Do you expect genes with higher mean expression to have higher or lower variability than genes with low expression? That is, which will have *higher variability* - genes with high average expression or genes with low average expression?
 
 ::: {.callout-note collapse="true"}
 ## Solution
-This can be a surprisingly complex question to answer, and depends on how we think about variance. If a gene has a high mean expression (*e.g.,* say 1000), then we can expect that the standard deviation will be a reasonably high number (*e.g.,* let's say 20). If a gene has low mean expression (e.g., 10), then the standard deviation will be small (*e.g.,* 2). So, it is true to say that for genes with higher average expression, the standard deviation is greater.
+This can be a surprisingly complex question to answer, and depends on how we think about variability. If a gene has a high mean expression (*e.g.,* say 1000), then we can expect that the standard deviation will be a reasonably high number (*e.g.,* let's say 50). If a gene has low mean expression (*e.g.,* 10), then the standard deviation will be small (*e.g.,* 4). So, it is true to say that for genes with higher average expression, the standard deviation is greater.
 
-However, we also need to think about magnitude of variance, which we can do using the numbers from our above imaginary examples. For the gene with a mean expression of 1000 and sd of 20, going from 1000 to 1020 is not a big change (*i.e.,* 1.02 fold change). For the gene with the low mean expression, going from 10 to 12 *is* a large change (*i.e.,* 1.2 fold change).
+However, we also need to think about magnitude of variability relative to the mean, which we can do using the numbers from our above imaginary examples. For the gene with a mean expression of 1000 and SD of 50, going from 1000 to 1050 is not a big change (*i.e.,* 1.05 fold change). For the gene with the low mean expression, going from 10 to 14 *is* a large change (*i.e.,* 1.4 fold change). Put another way, the SD is 5% of the mean for the first gene but 40% of the mean for the second.
 
-Our assumption then is that a large fold change, regardless of the actual read count change for that gene, has a meaningful biological effect. 
+This is because a large fold change, regardless of the actual read count change for that gene, is more likely to have a meaningful biological effect (or rather, this is the underlying assumption of all RNA-seq data analysis!)
 
-
-We will look more at heteroscedasticity when we begin to identify differentially expressed genes, but for now it is important to be aware of the concept.
+This dependence of variability on the mean is called heteroscedasticity. We will look more at heteroscedasticity when we begin to identify differentially expressed genes, but for now it is important to be aware of the concept.
 
 :::
-
 
 
 

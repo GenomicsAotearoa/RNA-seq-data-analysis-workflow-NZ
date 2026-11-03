@@ -20,7 +20,7 @@ If your data set was a physical problem (like a squeaky wheel or a well wrapped 
 
 From here and for the rest of the workshop, we will be working within R. 
 
-In the previous sections we generated counts for 3 samples. We are going to need a few more samples for the rest of this workshop when we explore gene expression, so we are loading in a counts file with 15 samples. 
+In the previous sections we generated counts for 3 samples. We are going to need a few more samples for the rest of this workshop when we explore gene expression, so we are loading in a counts file with 15 samples. We are also going to load in a metadata file that contains information about each sample, which we will load into R as a dataframe called coldata. 
 
 We have 3 phenotype groups, each with 5 biological replicates:
 
@@ -73,7 +73,7 @@ counts |> head()
 ncol(counts)
 ```
 
-Let's look at the metadata we have for these samples:
+Let's look at the **metadata** we have for these samples:
 
 ```{r}
 
@@ -81,7 +81,7 @@ coldata |> head()
 
 ```
 
-The first column has all our sample names, which match exactly the column names in our counts table. We then have multiple columns that contain various metadata about our samples, including whether or not samples were part of control (C) or treatment (T) groups, the histologically determined phenotype, timepoint columns and the original length and weight of the fish that the gonad was retrieved from. 
+The first column has all our sample names, which match exactly the column names in our counts table. We then have multiple columns that contain various metadata about our samples, including whether or not samples were part of control (C) or treatment (T) groups, the batch the sample was processed in (these samples come from experiments across two years - 2016 and 2018), the histologically determined phenotype (F = female gonad, MT = mid-transitioning gonad, TPM = terminal phase male gonad), timepoint columns and the original length and weight of the fish that the gonad was retrieved from. 
 
 
 
@@ -99,7 +99,7 @@ summary(counts)
 ```
 
 
-Zero counts sometimes need to be dealt with for differential expression (we'll get to this in the next section), but for visualisation purposes we often do need to filter them out manually. You can either remove very low counts and/or add 1 to all counts (to prevent issues when logging counts of 0).
+Zero counts sometimes need to be dealt with for differential expression (we'll get to this in the next section, as different pipelines handle zeros differently), but for visualisation purposes we often do need to filter them out manually.  It is common to remove genes with very low counts before any downstream analysis or plotting, but there are different approaches to chosing the threshold. For now, when plotting genes we need to log2 the counts, after adding 1 to all counts so that we don't log zero (which will result in an error or infinite value).  
 
 To remove all rows with 0 counts (genes where no sample has a read mapping to it), you could run something like this:
 
@@ -126,9 +126,9 @@ Let's first look at the distribution of counts across our samples. Boxplots can 
 
 
 # Convert counts data to long format for ggplot
-counts_long <- counts %>%
-  as.data.frame() %>%
-  tibble::rownames_to_column("Gene") %>%
+counts_long <- counts |>
+  as.data.frame() |>
+  tibble::rownames_to_column("Gene") |>
   tidyr::pivot_longer(cols = -Gene, names_to = "sample", values_to = "Counts")
 
 # Create boxplot with ggplot2
@@ -144,15 +144,12 @@ ggplot(counts_long, aes(x = sample, y = Counts)) +
 
 RNAseq raw count data can range from the 10s to 100,000s of reads mapped to a gene, which is highlighted by this figure. This indicates we should transform our data, and a good option for this is logging our data (for the purpose of visualisations).
 
-Log transform the data, adding 1 to avoid log(0) errors.
-
-We use log2 for counts for RNAseq - more on why later!
+Next we'll log transform the data, adding 1 to avoid log(0) errors. We use log2 for counts for RNAseq - more on why later!
 
 
 ```{r}
 
-
-# create new df that includes counts in long form and all metadata in the coldata
+# Create new df that includes counts in long form and all metadata in the coldata
 counts_long_metadata <- counts_long |> 
   left_join(coldata, by = "sample")  |>
   mutate(sample = fct_reorder(sample, histology))
@@ -182,18 +179,19 @@ A common question to ask at this point is, are the differences we can see betwee
 
 ### Library size
 
-Library size refers to the total number of reads for the entire sample. If two samples have vastly different library sizes, genes would look differentially expressed between samples e.g., if one library was twice as large as another, all genes would look to be upregulated in the larger library sample. Before we compare counts across samples we need to check whether the library sizes are approximately similar, and if they are not, make a correction to account for the size differences.
+Library size refers to the total number of reads for the entire sample. If two samples have vastly different library sizes, genes would look erroneously differentially expressed between samples e.g., if one library was twice as large as another, all genes would look to be upregulated in the larger library sample. Differences in library sizes are something that needs to be corrected before differential gene expression can be performed on our sample groups. Often this is included as part of the standard DGE pipeline, but it is worth checking the library sizes before moving forward. 
 
+In this code below, we are summing up the total counts in each column, which is how many reads mapped to or are assigned to each sample. This count is the total library size for each sample. 
 
 
 ```{r}
 
-colSums(counts) %>%
-  as.data.frame() %>%
-  setNames("reads") %>% 
-  tibble::rownames_to_column("sample") %>%
-  left_join(coldata, by = "sample") %>%
-  mutate(sample = fct_reorder(sample, histology)) %>% 
+colSums(counts) |>
+  as.data.frame() |>
+  setNames("reads") |> 
+  tibble::rownames_to_column("sample") |>
+  left_join(coldata, by = "sample") |>
+  mutate(sample = fct_reorder(sample, histology)) |> 
   ggplot(aes(x = sample, y = reads, fill = histology)) +
   geom_col(colour = "black") +
   labs(
@@ -206,7 +204,10 @@ colSums(counts) %>%
 
 
 
-Library sizes differs a bit across the samples and it *appears* (still no statistics performed yet!) there is a trend in differences between groups. This indicates it will be important to correct for library size, which can be achieved by calculating a sample-specific value called a size factor. If we take the raw read counts and divide by the size factor for each sample, the resulting values would be similar for all samples. The way in which size factors are implemented will differ depending on the analysis method used. For some methods the size factor must be manually used to correct for library sizes. For other methods (*e.g.,* DESeq2, which we will use shortly) automatically estimates size factors and implements them into the differential gene expression analysis workflow.
+Library sizes differ a bit across the samples and it *appears* (still no statistics performed yet!) there is a trend in differences between groups. This indicates it will be important to correct for library size, which can be achieved by calculating a sample-specific value called a size factor. If we take the raw read counts and divide by the size factor for each sample, the resulting values would become comparable for all samples. The way in which size factors are implemented will differ depending on the analysis method used. For some methods the size factor must be manually used to correct for library sizes. For other methods (*e.g.,* DESeq2, which we will use shortly) automatically estimates size factors (and also corrects for [library composition](background.qmd#sequencing-depth-library-size-and-library-composition)) and implements them into the differential gene expression analysis workflow.
+
+*Note: Library size and sequencing depth are not quite the same thing. All your samples could start out with the same sequencing depth (e.g., all have 30 M reads), but if one sample has more reads that are filtered out during trimming or have less reads assigned to reads during quantification, it will have a smaller library size than the other samples.*
+
 
 ### Principal Component Analysis 
 
@@ -214,7 +215,7 @@ A principal component analysis (PCA) is linear dimensionality technique that can
 
 In simple turns, we are making a plot that shows us how similar or different each sample is, taking in to account all of the gene expression. A PCA plot can help us see the biggest sources of biological variation and help determine which has more of an affect on the gene expression – whether that be the treatment type, the tissue type or something else (*e.g.,* an unintended batch effect or outliers).  
 
-First, we need to remove all genes with zero counts across all samples. We can apply a slightly stricter filtering threshold than the one we used earlier (`counts_filtered <- counts[rowSums(counts) > 0, ]`) where all genes with zero counts across all samples are removed. Below, this code will keep all genes where at least two columns (samples) have a count of 10 or more. This is arbitrary, you could chose to make it stricter or more lenient depending on your dataset and what you are trying to achieve. 
+First, we need to remove all genes with low counts across all samples. We can apply a slightly stricter filtering threshold than the one we used earlier (`counts_filtered <- counts[rowSums(counts) > 0, ]`) where all genes with zero counts across all samples are removed. Below, this code will keep all genes where at least two columns (samples) have a count of 10 or more. This is arbitrary, you could chose to make it stricter or more lenient depending on your dataset and what you are trying to achieve. 
  
 ```{r}
 counts_filtered <- counts[rowSums(counts >= 10) >= 2, ]
@@ -254,8 +255,8 @@ The PCA object is a list with several attributes we will pull out for plotting.
 What we don't currently have loaded in is our metadata, which we'll want for plotting. Let's pull out the PC data, convert rownames to a column so that the sample names can be matched to the coldata dataframe using left join. 
 
 ```{r}
-pca_data <- as.data.frame(pca$x) %>%
-  tibble::rownames_to_column("sample") %>%
+pca_data <- as.data.frame(pca$x) |>
+  tibble::rownames_to_column("sample") |>
   left_join(coldata, by = "sample")
 
 head(pca_data)
@@ -283,7 +284,7 @@ ggplot(pca_data, aes(x = PC1, y = PC2, colour = histology, shape = batchname)) +
 
 ##### DISCUSSION 🧠🏋️‍♀️ (3 mins)
 
-What's the next thing we might want to plot using PCA data to investigate trends in our data? 
+What's the next thing we might want to add to our plot from our metadata to investigate trends in our data using PCA? 
 
 ::: {.callout-tip collapse="true"}
 # SOLUTION

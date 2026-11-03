@@ -75,7 +75,7 @@ STAR \
 --genomeFastaFiles GCF_009762535.1_fNotCel1.pri_genomic.fna \
 --sjdbGTFfile GCF_009762535.1_fNotCel1.pri_genomic.gtf \
 --sjdbOverhang <int> \  # change
---genomeSAindexNbases 14  # not change
+--genomeSAindexNbases 11  # not change
 ```
 
 :::
@@ -145,7 +145,6 @@ mkdir Align && cd Align
 Let's run the script (this will take **approximately 15 minutes to run**), and as it's going, talk about some of the flags we used:  
 
 ```bash
-
 # Set shell variables
 genomedir="../Genome"
 trimmeddir="../Trimmed"
@@ -315,8 +314,7 @@ The main statistics you should check are:
 *% of reads mapped to multiple loci* – multi-mapping reads. Not counted in default gene counts output. Can adjust flags during alignment to count these if desired, but this does get more complex. Read the section  '5.2.1 Multimappers' in the STAR manual.      
 *% of reads mapped to too many loci* – these reads exceeded the value given for the `--outFilterMultimapNmax` flag (or the default value of 10 if flag not specified during alignment) and these alignments are discarded.  
 
-**Unmapped reads**  
-All reads that did not map to the genome. This is broken up into three categories – too many mismatches, too short or other. In total you would expect these values to be small (*e.g.,* <5%). Mismatches could be handled by changing alignment flags (mentioned earlier), but if this number is particularly high (*e.g.,* >10%), you may need to consider whether the reference genome you are using is appropriate, or if there is some other biological or technical reason your reads have many base pair mismatches. Reads that are too short could be from over-trimming. You may need to filter your trimmed reads to remove any below a threshold (*e.g.,* discard all reads shorter than 36bp is a common cut-off; Trimmomatic has the option MINLEN).  
+**Unmapped reads**: All reads that did not map to the genome. This is broken up into three categories – too many mismatches, too short or other. In total you would expect these values to be small (*e.g.,* <5%). Mismatches could be handled by changing alignment flags (mentioned earlier), but if this number is particularly high (*e.g.,* >10%), you may need to consider whether the reference genome you are using is appropriate, or if there is some other biological or technical reason your reads have many base pair mismatches. Reads that are too short could be from over-trimming. You may need to filter your trimmed reads to remove any below a threshold (*e.g.,* discard all reads shorter than 36bp is a common cut-off; Trimmomatic has the option MINLEN).  
 
 
 ##### DISCUSSION 🤔 (2 mins)
